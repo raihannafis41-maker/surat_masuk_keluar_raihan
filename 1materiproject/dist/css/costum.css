@@ -1,0 +1,70 @@
+/* Kartu admin */
+.admin-card {
+  background-color: #2f353a;
+  border-radius: 15px;
+  border: 1px solid #3c434a;
+  padding: 20px;
+  color: #e9ecef;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.admin-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+}
+
+/* Foto admin */
+.admin-photo-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.admin-photo {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #3c8dbc;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.admin-photo:hover {
+  transform: scale(1.05);
+  border-color: #00c0ef;
+}
+
+/* Text */.admin-card h5 {
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.admin-card p {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+/* Tombol */
+.admin-card .btn {
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.admin-card .btn-warning:hover {
+  background-color: #ffce45 !important;
+  transform: translateY(-2px);
+}
+
+.admin-card .btn-danger:hover {
+  background-color: #e74c3c !important;
+  transform: translateY(-2px);
+}
+
+/* Grid responsif */
+@media (max-width: 768px) {
+  .admin-photo {
+    width: 85px;
+    height: 85px;
+  }
+}

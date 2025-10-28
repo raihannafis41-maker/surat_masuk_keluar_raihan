@@ -1,0 +1,218 @@
+/* modern-anim.css
+   Minimal dependencies. Works with modern browsers.
+*/
+
+/* --- fonts & reset --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+:root{
+  --bg1:#0f1724;
+  --bg2:#10293f;
+  --accent1:#4fb3ff;
+  --accent2:#6ec7ff;
+  --glass: rgba(255,255,255,0.06);
+  --muted:#9aa7b2;
+  --card:#0e1720;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(79,179,255,0.08), transparent 8%),
+              radial-gradient(1000px 500px at 90% 90%, rgba(110,199,255,0.06), transparent 8%),
+              linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 100%);
+  color:#e6eef6;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-y:auto;
+}
+
+/* --- animated blobs (background decoration) --- */
+.bg-blobs{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:0.9;
+}
+.blob{
+  position:absolute;
+  filter: blur(28px) saturate(120%);
+  transform-origin:center;
+  mix-blend-mode: screen;
+  animation: floaty 10s ease-in-out infinite;
+  opacity:0.8;
+}
+.blob.one{width:520px;height:520px;background: linear-gradient(135deg,var(--accent1),var(--accent2)); left:-120px; top:-60px; animation-duration:12s;}
+.blob.two{width:420px;height:420px;background: linear-gradient(135deg,#b18aff,#7fd3ff); right:-90px; bottom:-80px; animation-duration:14s;}
+@keyframes floaty{
+  0%{transform: translateY(0) scale(1) rotate(0deg)}
+  50%{transform: translateY(-20px) scale(1.03) rotate(6deg)}
+  100%{transform: translateY(0) scale(1) rotate(0deg)}
+}
+
+/* --- LOGIN CARD --- */
+.login-wrap{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:48px 20px;
+  z-index:2;
+  position:relative;
+}
+.login-card{
+  width:960px;
+  max-width:95%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  border-radius:16px;
+  box-shadow: 0 20px 50px rgba(3,10,18,0.6);
+  display:grid;
+  grid-template-columns: 1fr 420px;
+  overflow:hidden;
+}
+
+/* left: illustration / welcome */
+.login-visual{
+  padding:36px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  justify-content:center;
+  min-height:420px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:8px;
+}
+.brand .logo{
+  width:48px;height:48px;border-radius:12px;
+  background:linear-gradient(135deg,var(--accent1),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow: 0 6px 18px rgba(81,170,255,0.12);
+  font-weight:700;color:#062034;
+  font-size:18px;
+}
+.brand h2{margin:0;font-size:20px;color:#eaf6ff}
+.brand p{margin:0;color:var(--muted);font-size:13px}
+
+/* envelope animation area */
+.envelope-wrap{
+  margin-top:20px;
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+.envelope{
+  width:92px;height:64px;position:relative;
+  --env:#11212b;
+  background:linear-gradient(180deg,#05202a,#0c3440);
+  border-radius:8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.02);
+  transform-origin:center;
+  transition: transform .35s cubic-bezier(.2,.9,.3,1);
+}
+.envelope::before{
+  content:"";
+  position:absolute;left:0;right:0;top:-24px;height:48px;background:linear-gradient(180deg,#0066cc,#62c7ff);
+  transform: skewY(-12deg);
+  border-radius:10px 10px 0 0;
+  opacity:0.95;
+  clip-path: polygon(0 100%, 50% 0, 100% 100%);
+}
+.envelope.bounce { animation: envBounce .9s cubic-bezier(.2,.9,.3,1); }
+@keyframes envBounce {
+  0%{transform: translateY(0)}
+  30%{transform: translateY(-14px) rotate(-2deg)}
+  60%{transform: translateY(0)}
+  100%{transform: translateY(0)}
+}
+.envelope-count{
+  position:absolute; right:-14px; top:-12px; background:var(--accent1); color:#04212b; font-weight:700;
+  border-radius:12px; padding:6px 10px; font-size:12px; box-shadow:0 8px 18px rgba(76,175,255,0.12);
+}
+
+/* right: form */
+.login-form-wrap{
+  padding:28px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.form-title{font-weight:700;color:#e9f7ff;margin-bottom:8px}
+.form-sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+
+/* input style: floating label */
+.form-group{position:relative;margin-bottom:18px}
+.input{
+  width:100%;
+  padding:14px 14px;
+  padding-left:48px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  color:#e7f5ff;
+  outline:none; transition:all .18s;
+}
+.input:focus{ box-shadow: 0 6px 20px rgba(14,128,255,0.06); border-color: rgba(110,199,255,0.45) }
+.icon-input{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:0.9}
+
+/* small helper texts */
+.helper{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* submit button with progress */
+.btn-submit{
+  display:inline-flex;align-items:center;gap:10px;
+  border:none;padding:12px 18px;border-radius:10px;font-weight:700;
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));
+  color:#062034; cursor:pointer;
+  transition:transform .12s, box-shadow .12s;
+}
+.btn-submit:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(74,179,255,0.12)}
+
+/* overlay when submit pressed */
+.submit-overlay{
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(2,6,12,0.65);z-index:9999;
+}
+.loader-card{
+  width:420px;max-width:92%;padding:28px;border-radius:14px;background: linear-gradient(180deg,#051923, #06202b);
+  display:flex;flex-direction:column;align-items:center;gap:16px;box-shadow:0 16px 40px rgba(0,0,0,0.6);
+}
+.loader-bar{
+  width:100%;height:12px;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;
+}
+.loader-progress{
+  height:100%;width:0%; background:linear-gradient(90deg,#64c7ff,#2f9ef3);
+  transition:width 1s linear;
+}
+
+/* --- SURAT CARD (dashboard snippet) --- */
+.surat-cards{
+  display:flex;gap:18px;flex-wrap:wrap;
+}
+.surat-card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  padding:18px;border-radius:14px;width:320px;box-shadow:0 12px 28px rgba(0,0,0,0.45);
+}
+.surat-card h3{margin:0;font-size:18px;color:#eaf8ff}
+.surat-badge{display:flex;align-items:center;gap:12px;margin-top:10px}
+.surat-icon{
+  width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,#0b2f3f,#093445);display:flex;
+  align-items:center;justify-content:center;color:#9be9ff;font-weight:800;font-size:18px;
+  box-shadow:0 8px 20px rgba(2,110,170,0.08);
+}
+.counter{font-size:28px;font-weight:800;color:var(--accent2)}
+.surat-note{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* responsive */
+@media (max-width:880px){
+  .login-card{grid-template-columns:1fr}
+  .login-visual{display:none}
+}

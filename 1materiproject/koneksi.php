@@ -2,10 +2,10 @@
 $server = "localhost";
 $user   = "root";
 $pass   = "";
-$db     = "bantuananakyatimuna";
+$db     = "db_surat";
 
 // Membuat koneksi
-$koneksi = mysqli_connect($server, $user, $pass, $db);
+$koneksi = mysqli_connect("localhost", "root", "", "surat_masuk_keluar_raihan");
 
 // Mengecek koneksi
 if (!$koneksi) {

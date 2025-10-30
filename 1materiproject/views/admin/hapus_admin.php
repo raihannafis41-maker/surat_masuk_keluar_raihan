@@ -1,13 +1,16 @@
 <?php
-include '../koneksi.php';
+require_once __DIR__ . '/../../db/db_admin.php';
 
 if (!isset($_GET['id'])) {
-    header('Location: index.php?halaman=admin');
+    echo "<script>alert('ID admin tidak ditemukan!'); window.location='index.php?halaman=admin';</script>";
     exit;
 }
 
-$id = intval($_GET['id']);
-mysqli_query($koneksi, "DELETE FROM admin WHERE id_admin='$id'");
-header('Location: index.php?halaman=admin');
-exit;
+$id = $_GET['id'];
+
+if (deleteAdmin($koneksi, $id)) {
+    echo "<script>alert('Admin berhasil dihapus!'); window.location='index.php?halaman=admin';</script>";
+} else {
+    echo "<script>alert('Gagal menghapus admin!'); window.location='index.php?halaman=admin';</script>";
+}
 ?>

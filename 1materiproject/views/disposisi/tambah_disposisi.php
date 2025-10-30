@@ -1,7 +1,7 @@
 <?php
 // Pastikan session sudah aktif agar tidak muncul warning
 if (session_status() == PHP_SESSION_NONE) {
-  session_start();
+    session_start();
 }
 
 // Pastikan koneksi ke database
@@ -60,14 +60,19 @@ $pegawaiQuery = mysqli_query($koneksi, "SELECT id_pegawai, nama_pegawai FROM peg
         <textarea name="catatan" id="catatan" rows="3" class="form-control" placeholder="Tulis catatan..."></textarea>
       </div>
 
-
-      <div class="card-footer">
-        <button type="submit" class="btn btn-success">
-          <i class="fas fa-save"></i> Simpan
-        </button>
-        <a href="index.php?halaman=disposisi" class="btn btn-secondary">
-          <i class="fas fa-arrow-left"></i> Kembali
-        </a>
+      <div class="form-group">
+        <label for="file_disposisi">File Disposisi (Opsional)</label>
+        <input type="file" name="file_disposisi" id="file_disposisi" class="form-control">
       </div>
+    </div>
+
+    <div class="card-footer">
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-save"></i> Simpan
+      </button>
+      <a href="index.php?halaman=disposisi" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Kembali
+      </a>
+    </div>
   </form>
 </div>

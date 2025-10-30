@@ -1,83 +1,78 @@
-<?php
-error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
-include __DIR__ . '/../../koneksi.php';
-include __DIR__ . '/../../db/db_surat_keluar.php';
+<?php 
+require_once __DIR__ . '/../../db/db_surat_masuk.php';
 
-
-
-if (isset($_POST['simpan'])) {
-  $no_surat = $_POST['no_surat'];
-  $tgl_surat = $_POST['tgl_surat'];
-  $tujuan = $_POST['tujuan'];
-  $alamat_tujuan = $_POST['alamat_tujuan'];
-  $perihal = $_POST['perihal'];
-  $isi = $_POST['isi'];
-  $id_pegawai = $_POST['id_pegawai'];
-
-  // Upload file
-  $nama_file = $_FILES['file_surat']['name'];
-  $tmp_file = $_FILES['file_surat']['tmp_name'];
-  $folder = "../../file_surat/";
-
-  if ($nama_file != "") {
-    move_uploaded_file($tmp_file, $folder . $nama_file);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if (tambahSuratMasuk($koneksi, $_POST, $_FILES['file_surat'])) {
+    echo "<script>
+      alert('✅ Surat masuk berhasil ditambahkan');
+      window.location='../../index.php?halaman=surat_masuk';
+    </script>";
   } else {
-    $nama_file = null;
-  }
-
-  if (tambahSuratKeluar($conn, $no_surat, $tgl_surat, $tujuan, $alamat_tujuan, $perihal, $isi, $nama_file, $id_pegawai)) {
-    echo "<script>alert('Surat keluar berhasil ditambahkan'); window.location='surat_keluar.php';</script>";
-  } else {
-    echo "<script>alert('Gagal menambahkan surat keluar');</script>";
+    echo "<script>alert('❌ Gagal menambah surat masuk');</script>";
   }
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
+<div class="card card-primary shadow-sm">
+  <div class="card-header bg-primary text-white">
+    <h3 class="card-title mb-0">
+      <i class="fas fa-envelope-open-text"></i> Tambah Surat Masuk
+    </h3>
+  </div>
 
-<head>
-  <meta charset="UTF-8">
-  <title>Tambah Surat Keluar</title>
-  <link rel="stylesheet" href="../../assets/bootstrap.min.css">
-</head>
+  <form action="" method="POST" enctype="multipart/form-data">
+    <div class="card-body">
+      <div class="row g-3">
 
-<body class="container mt-5">
-  <h3 class="mb-4">Tambah Surat Keluar</h3>
+        <div class="col-md-6">
+          <label for="no_surat" class="form-label">No Surat</label>
+          <input type="text" name="no_surat" id="no_surat" class="form-control" required>
+        </div>
 
-  <form method="POST" enctype="multipart/form-data">
-    <div class="form-group mb-3">
-      <label>No Surat</label>
-      <input type="text" name="no_surat" class="form-control" required>
-    </div>
-    <div class="form-group mb-3">
-      <label>Tanggal Surat</label>
-      <input type="date" name="tgl_surat" class="form-control" required>
-    </div>
-    <div class="form-group mb-3">
-      <label>Tujuan</label>
-      <input type="text" name="tujuan" class="form-control" required>
-    </div>
-    <div class="form-group mb-3">
-      <label>Alamat Tujuan</label>
-      <input type="text" name="alamat_tujuan" class="form-control" required>
-    </div>
-    <div class="form-group mb-3">
-      <label>Perihal</label>
-      <input type="text" name="perihal" class="form-control" required>
-    </div>
-    <div class="form-group mb-3">
-      <label>Isi Surat</label>
-      <textarea name="isi" class="form-control" rows="4" required></textarea>
-    </div>
-    <div class="form-group mb-3">
-      <label>File Surat (PDF)</label>
-      <input type="file" name="file_surat" accept=".pdf,.docx,.jpg,.png" class="form-control">
+        <div class="col-md-6">
+          <label for="tgl_surat" class="form-label">Tanggal Surat</label>
+          <input type="date" name="tgl_surat" id="tgl_surat" class="form-control" required>
+        </div>
+
+        <div class="col-md-6">
+          <label for="pengirim" class="form-label">Pengirim</label>
+          <input type="text" name="pengirim" id="pengirim" class="form-control" required>
+        </div>
+
+        <div class="col-md-6">
+          <label for="perihal" class="form-label">Perihal</label>
+          <input type="text" name="perihal" id="perihal" class="form-control" required>
+        </div>
+
+        <div class="col-md-6">
+          <label for="status" class="form-label">Status</label>
+          <select name="status" id="status" class="form-select" required>
+            <option value="baru" selected>Baru</option>
+            <option value="diproses">Diproses</option>
+            <option value="selesai">Selesai</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label for="isi" class="form-label">Isi Surat</label>
+          <textarea name="isi" id="isi" rows="4" class="form-control" required></textarea>
+        </div>
+
+        <div class="col-12">
+          <label for="file_surat" class="form-label">File Surat (PDF/JPG/PNG)</label>
+          <input type="file" name="file_surat" id="file_surat" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+        </div>
+
+      </div>
     </div>
 
-    <button type="submit" name="simpan" class="btn btn-primary">Simpan</button>
-    <a href="surat_keluar.php" class="btn btn-secondary">Kembali</a>
+    <div class="card-footer text-end">
+      <a href="../../index.php?halaman=surat_masuk" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Kembali
+      </a>
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-save"></i> Simpan
+      </button>
+    </div>
   </form>
-</body>
-
-</html>
+</div>

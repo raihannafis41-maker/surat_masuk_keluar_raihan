@@ -97,6 +97,7 @@ for ($bulan = 1; $bulan <= 12; $bulan++) {
                   <th>Tanggal</th>
                 </tr>
               </thead>
+              
               <tbody>
                 <?php $no=1; while($sm = mysqli_fetch_assoc($surat_masuk)): ?>
                 <tr>

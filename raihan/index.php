@@ -1,23 +1,16 @@
 <?php
-// ===================================================
-// ✅ INDEX.PHP – Sistem Surat Masuk Keluar (Raihan)
-// Versi Aman, Dinamis, dan Anti Error Path
-// ===================================================
-
-// Aktifkan error reporting (opsional, untuk debugging)
+// Aktifkan error reporting (opsional untuk debugging)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Mulai session untuk autentikasi (tanpa warning)
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Mulai session untuk cek login
+session_start();
 
 // Jika belum login, arahkan ke login.php
 if (empty($_SESSION['user'])) {
-    header("Location: login.php");
-    exit;
+  header("Location: login.php");
+  exit;
 }
 ?>
 
@@ -41,15 +34,13 @@ if (empty($_SESSION['user'])) {
       <?php include 'pages/navbar.php'; ?>
     </nav>
 
-    <!-- Sidebar -->
+    <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
       <?php include 'pages/sidebar.php'; ?>
     </aside>
 
     <!-- Content Wrapper -->
     <div class="content-wrapper">
-
-      <!-- Header -->
       <div class="content-header">
         <div class="container-fluid">
           <div class="row mb-2">
@@ -58,66 +49,137 @@ if (empty($_SESSION['user'])) {
             </div>
             <div class="col-sm-6">
               <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="?halaman=dashboard">Home</a></li>
-                <li class="breadcrumb-item active">
-                  <?php echo isset($_GET['halaman']) ? ucfirst($_GET['halaman']) : 'Dashboard'; ?>
-                </li>
+                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item active">Dashboard</li>
               </ol>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Main Content -->
+      <!-- Main content -->
       <section class="content">
         <?php
-        // ===================================================
-        // 🔄 ROUTER OTOMATIS (anti error path & mudah dikembangkan)
-        // ===================================================
-
         if (isset($_GET['halaman'])) {
-            $halaman = basename($_GET['halaman']); // keamanan: hilangkan karakter aneh
-            $found = false;
+          switch ($_GET['halaman']) {
 
-            // Coba cari di folder views utama
-            if (file_exists("views/$halaman.php")) {
-                include("views/$halaman.php");
-                $found = true;
-            } else {
-                // Jika tidak ditemukan, coba cari di subfolder berikut
-                $folders = [
-                    'admin',
-                    'pegawai',
-                    'kategori',
-                    'surat_masuk',
-                    'surat_keluar',
-                    'disposisi'
-                ];
+            /* ============================
+               BAGIAN ADMIN
+            ============================ */
+            case "admin":
+              include("views/admin/admin.php");
+              break;
+            case "tambah_admin":
+              include("views/admin/tambah_admin.php");
+              break;
+            case "edit_admin":
+              include("views/admin/edit_admin.php");
+              break;
+            case "hapus_admin":
+              include("views/admin/hapus_admin.php");
+              break;
 
-                foreach ($folders as $folder) {
-                    $file = "views/$folder/$halaman.php";
-                    if (file_exists($file)) {
-                        include($file);
-                        $found = true;
-                        break;
-                    }
-                }
-            }
+            /* ============================
+               BAGIAN PEGAWAI
+            ============================ */
+            case "pegawai":
+              include("views/pegawai/pegawai.php");
+              break;
+            case "tambah_pegawai":
+              include("views/pegawai/tambah_pegawai.php");
+              break;
+            case "edit_pegawai":
+              include("views/pegawai/edit_pegawai.php");
+              break;
+            case "hapus_pegawai":
+              include("views/pegawai/hapus_pegawai.php");
+              break;
 
-            // Jika tetap tidak ditemukan
-            if (!$found) {
-                include("views/notfound.php");
-            }
+            /* ============================
+               BAGIAN KATEGORI
+            ============================ */
+            case "kategori":
+              include("views/kategori/kategori.php");
+              break;
+            case "tambah_kategori":
+              include("views/kategori/tambah_kategori.php");
+              break;
+            case "edit_kategori":
+              include("views/kategori/edit_kategori.php");
+              break;
+            case "hapus_kategori":
+              include("views/kategori/hapus_kategori.php");
+              break;
+
+            /* ============================
+               BAGIAN SURAT KELUAR
+            ============================ */
+            case "surat_keluar":
+              include("views/surat_keluar/surat_keluar.php");
+              break;
+            case "tambah_surat_keluar":
+              include("views/surat_keluar/tambah_surat_keluar.php");
+              break;
+            case "edit_surat_keluar":
+              include("views/surat_keluar/edit_surat_keluar.php");
+              break;
+            case "hapus_surat_keluar":
+              include("views/surat_keluar/hapus_surat_keluar.php");
+              break;
+
+            /* ============================
+               BAGIAN SURAT MASUK
+            ============================ */
+            case "surat_masuk":
+              include("views/surat_masuk/surat_masuk.php");
+              break;
+            case "tambah_surat_masuk":
+              include("views/surat_masuk/tambah_surat_masuk.php");
+              break;
+            case "edit_surat_masuk":
+              include("views/surat_masuk/edit_surat_masuk.php");
+              break;
+            case "hapus_surat_masuk":
+              include("views/surat_masuk/hapus_surat_masuk.php");
+              break;
+
+            /* ============================
+               BAGIAN DISPOSISI
+            ============================ */
+            case "disposisi":
+              include("views/disposisi/disposisi.php");
+              break;
+            case "tambah_disposisi":
+              include("views/disposisi/tambah_disposisi.php");
+              break;
+            case "edit_disposisi":
+              include("views/disposisi/edit_disposisi.php");
+              break;
+            case "hapus_disposisi":
+              include("views/disposisi/hapus_disposisi.php");
+              break;
+
+            /* ============================
+               DASHBOARD / DEFAULT
+            ============================ */
+            case "dashboard":
+            case "home":
+              include("views/dashboard.php");
+              break;
+
+            default:
+              include("views/notfound.php");
+              break;
+          }
         } else {
-            // Default: tampilkan dashboard
-            include("views/dashboard.php");
+          include("views/dashboard.php"); // dashboard sebagai default
         }
         ?>
       </section>
     </div>
   </div>
 
-  <!-- SCRIPTS -->
+  <!-- REQUIRED SCRIPTS -->
   <script src="plugins/jquery/jquery.min.js"></script>
   <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
@@ -129,6 +191,7 @@ if (empty($_SESSION['user'])) {
   <script src="plugins/chart.js/Chart.min.js"></script>
   <script src="dist/js/demo.js"></script>
   <script src="dist/js/pages/dashboard2.js"></script>
+
 </body>
 
 </html>

@@ -2,87 +2,76 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-include 'koneksi.php';
+require_once __DIR__ . '/../../koneksi.php';
 
-
-// Ambil data dari tabel pegawai
+// Ambil semua data pegawai
 $query = mysqli_query($koneksi, "SELECT * FROM pegawai ORDER BY id_pegawai DESC");
 ?>
 
-<div class="card">
-    <div class="card-header bg-primary text-white">
-        <h3 class="card-title">Data Pegawai</h3>
-        <div class="card-tools">
-            <a href="index.php?halaman=tambah_pegawai" class="btn btn-light btn-sm">
-                <i class="fas fa-plus"></i> Tambah Pegawai
-            </a>
-        </div>
-    </div>
-
-    <div class="card-body">
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>No</th>
-                    <th>NIP</th>
-                    <th>Nama Pegawai</th>
-                    <th>Jabatan</th>
-                    <th>Email</th>
-                    <th>No. Telp</th>
-                    <th>Golongan</th>
-                    <th>Foto</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $no = 1;
-                if (mysqli_num_rows($query) > 0):
-                    while ($data = mysqli_fetch_assoc($query)):
-                ?>
-                        <tr>
-                            <td><?= $no++ ?></td>
-                            <td><?= htmlspecialchars($data['nip'] ?? '-') ?></td>
-                            <td><?= htmlspecialchars($data['nama_pegawai'] ?? '-') ?></td>
-                            <td><?= htmlspecialchars($data['jabatan'] ?? '-') ?></td>
-                            <td><?= htmlspecialchars($data['email'] ?? '-') ?></td>
-                            <td><?= htmlspecialchars($data['no_telp'] ?? '-') ?></td>
-                            <td><?= htmlspecialchars($data['golongan'] ?? '-') ?></td>
-
-                            <td>
-                                <?php
-                                $foto = $data['foto'] ?? '';
-                                $fotoPath = 'foto/' . $foto; // 🔥 Perbaikan di sini — tanpa ../../
-
-                                if (!empty($foto) && file_exists($fotoPath)) {
-                                    echo '<img src="' . $fotoPath . '" alt="Foto Pegawai" width="65" height="60" class="rounded-circle border">';
-                                } else {
-                                    echo '<span class="text-muted">Tidak ada</span>';
-                                }
-                                ?>
-                            </td>
-
-
-                            <td>
-                                <a href="index.php?halaman=edit_pegawai&id=<?= urlencode($data['id_pegawai']) ?>"
-                                    class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-
-                                <a href="hapus_pegawai.php?id=<?= urlencode($data['id_pegawai']) ?>"
-                                    class="btn btn-danger btn-sm"
-                                    onclick="return confirm('Yakin ingin menghapus data ini?');">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                <?php
-                    endwhile;
-                else:
-                    echo '<tr><td colspan="9" class="text-center text-muted">Data pegawai tidak ditemukan.</td></tr>';
-                endif;
-                ?>
-            </tbody>
-        </table>
+<div class="content-header">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <h4 class="m-0 text-dark">
+            <i class="fas fa-user-tie"></i> Data Pegawai
+        </h4>
+        <a href="index.php?halaman=tambah_pegawai" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Tambah Pegawai
+        </a>
     </div>
 </div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <?php if (mysqli_num_rows($query) > 0): ?>
+                <?php while ($row = mysqli_fetch_assoc($query)): ?>
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <div class="card shadow-sm text-center border-0" style="background-color: #2f3542; color: #fff;">
+                            <div class="card-body">
+                                <?php
+                                $fotoPath = "foto/" . ($row['foto'] ?? '');
+                                if (!empty($row['foto']) && file_exists($fotoPath)): ?>
+                                    <img src="<?= htmlspecialchars($fotoPath); ?>" 
+                                         alt="Foto Pegawai" 
+                                         class="rounded-circle mb-3" 
+                                         width="100" height="100"
+                                         style="object-fit: cover;">
+                                <?php else: ?>
+                                    <img src="assets/img/default-user.png" 
+                                         alt="Default" 
+                                         class="rounded-circle mb-3" 
+                                         width="100" height="100">
+                                <?php endif; ?>
+
+                                <h5 class="fw-bold"><?= htmlspecialchars($row['nama_pegawai']); ?></h5>
+                                <p class="mb-1"><i class="fas fa-id-card"></i> <?= htmlspecialchars($row['nip'] ?? '-'); ?></p>
+                                <p class="mb-1"><i class="fas fa-briefcase"></i> <?= htmlspecialchars($row['jabatan'] ?? '-'); ?></p>
+                                <p class="mb-1"><i class="fas fa-envelope"></i> <?= htmlspecialchars($row['email'] ?? '-'); ?></p>
+                                <p class="mb-2"><i class="fas fa-phone"></i> <?= htmlspecialchars($row['no_telp'] ?? '-'); ?></p>
+
+                                <div class="d-flex justify-content-center">
+                                    <a href="index.php?halaman=tampilan_pegawai&id=<?= $row['id_pegawai']; ?>" 
+                                       class="btn btn-info btn-sm mx-1">
+                                        <i class="fas fa-eye"></i> Lihat
+                                    </a>
+                                    <a href="index.php?halaman=edit_pegawai&id=<?= $row['id_pegawai']; ?>" 
+                                       class="btn btn-warning btn-sm mx-1">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="index.php?halaman=hapus_pegawai&id=<?= $row['id_pegawai']; ?>" 
+                                       onclick="return confirm('Yakin ingin menghapus pegawai ini?')"
+                                       class="btn btn-danger btn-sm mx-1">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <div class="col-12 text-center">
+                    <div class="alert alert-info">Belum ada data pegawai.</div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>

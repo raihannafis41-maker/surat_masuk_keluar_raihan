@@ -74,7 +74,7 @@ $result = mysqli_query($koneksi, $query);
               <a href="index.php?halaman=edit_disposisi&id=<?= $row['id_disposisi'] ?>" class="btn btn-sm btn-warning">
                 <i class="fas fa-edit"></i>
               </a>
-              <a href="hapus_disposisi.php?id=<?= $row['id_disposisi'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?')">
+              <a href="views/disposisi/hapus_disposisi.php?id=<?= $row['id_disposisi']; ?>" class="btn btn-danger btn-sm">Hapus</a>
                 <i class="fas fa-trash"></i>
               </a>
             </td>

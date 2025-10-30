@@ -1,66 +1,103 @@
 <?php
-include "../koneksi.php";
-session_start();
+require_once __DIR__ . '/../koneksi.php';
 
-$proses = $_GET['proses'] ?? '';
+/* =========================================================
+   FUNGSI CRUD SURAT MASUK (FINAL SESUAI STRUKTUR PROJECT)
+   ========================================================= */
 
-if ($proses == 'tambah') {
-    $no_surat        = $_POST['no_surat'];
-    $tgl_surat       = $_POST['tgl_surat'];
-    $tgl_terima      = $_POST['tgl_terima'];
-    $pengirim        = $_POST['pengirim'];
-    $alamat_pengirim = $_POST['alamat_pengirim'];
-    $perihal         = $_POST['perihal'];
-    $isi             = $_POST['isi'];
-    $status          = $_POST['status'];
-    $id_pegawai      = $_POST['id_pegawai'];
+// === READ ALL ===
+function getAllSuratMasuk($koneksi) {
+    $sql = "SELECT * FROM surat_masuk ORDER BY id_surat_masuk DESC";
+    $result = mysqli_query($koneksi, $sql);
+    $data = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = $row;
+    }
+    return $data;
+}
 
-    // Upload file
-    $file_surat = '';
-    if (!empty($_FILES['file_surat']['name'])) {
-        $targetDir = "../file_surat/";
-        if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
-        $file_surat = time() . "_" . basename($_FILES["file_surat"]["name"]);
-        move_uploaded_file($_FILES["file_surat"]["tmp_name"], $targetDir . $file_surat);
+// === GET BY ID ===
+function getSuratMasukById($koneksi, $id) {
+    $id = (int)$id;
+    $sql = "SELECT * FROM surat_masuk WHERE id_surat_masuk = $id";
+    $result = mysqli_query($koneksi, $sql);
+    return mysqli_fetch_assoc($result);
+}
+
+// === INSERT ===
+function tambahSuratMasuk($koneksi, $data, $file) {
+    $no_surat   = mysqli_real_escape_string($koneksi, $data['no_surat']);
+    $tgl_surat  = mysqli_real_escape_string($koneksi, $data['tgl_surat']);
+    $tgl_terima = mysqli_real_escape_string($koneksi, $data['tgl_terima']);
+    $pengirim   = mysqli_real_escape_string($koneksi, $data['pengirim']);
+    $alamat_pengirim = mysqli_real_escape_string($koneksi, $data['alamat_pengirim']);
+    $perihal    = mysqli_real_escape_string($koneksi, $data['perihal']);
+    $isi        = mysqli_real_escape_string($koneksi, $data['isi']);
+    $status     = mysqli_real_escape_string($koneksi, $data['status']);
+
+    $fileName = null;
+    if ($file && !empty($file['name'])) {
+        $uploadDir = __DIR__ . '/../uploads/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+        $fileName = time() . '_' . basename($file['name']);
+        move_uploaded_file($file['tmp_name'], $uploadDir . $fileName);
     }
 
-    mysqli_query($koneksi, "INSERT INTO surat_masuk (no_surat,tgl_surat,tgl_terima,pengirim,alamat_pengirim,perihal,isi,file_surat,status,id_pegawai) 
-        VALUES ('$no_surat','$tgl_surat','$tgl_terima','$pengirim','$alamat_pengirim','$perihal','$isi','$file_surat','$status','$id_pegawai')");
+    $sql = "INSERT INTO surat_masuk (no_surat, tgl_surat, tgl_terima, pengirim, alamat_pengirim, perihal, isi, file_surat, status)
+            VALUES ('$no_surat', '$tgl_surat', '$tgl_terima', '$pengirim', '$alamat_pengirim', '$perihal', '$isi', '$fileName', '$status')";
+    return mysqli_query($koneksi, $sql);
+}
 
-    header("Location: ../index.php?halaman=surat_masuk");
+// === UPDATE ===
+function updateSuratMasuk($koneksi, $id, $data, $file) {
+    $id = (int)$id;
+    $lama = getSuratMasukById($koneksi, $id);
+    $fileLama = $lama['file_surat'];
 
-} elseif ($proses == 'edit') {
-    $id_surat_masuk  = $_POST['id_surat_masuk'];
-    $no_surat        = $_POST['no_surat'];
-    $tgl_surat       = $_POST['tgl_surat'];
-    $tgl_terima      = $_POST['tgl_terima'];
-    $pengirim        = $_POST['pengirim'];
-    $alamat_pengirim = $_POST['alamat_pengirim'];
-    $perihal         = $_POST['perihal'];
-    $isi             = $_POST['isi'];
-    $status          = $_POST['status'];
-    $id_pegawai      = $_POST['id_pegawai'];
+    $no_surat   = mysqli_real_escape_string($koneksi, $data['no_surat']);
+    $tgl_surat  = mysqli_real_escape_string($koneksi, $data['tgl_surat']);
+    $tgl_terima = mysqli_real_escape_string($koneksi, $data['tgl_terima']);
+    $pengirim   = mysqli_real_escape_string($koneksi, $data['pengirim']);
+    $alamat_pengirim = mysqli_real_escape_string($koneksi, $data['alamat_pengirim']);
+    $perihal    = mysqli_real_escape_string($koneksi, $data['perihal']);
+    $isi        = mysqli_real_escape_string($koneksi, $data['isi']);
+    $status     = mysqli_real_escape_string($koneksi, $data['status']);
 
-    $fileQuery = "";
-    if (!empty($_FILES['file_surat']['name'])) {
-        $targetDir = "../file_surat/";
-        if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
-        $file_surat = time() . "_" . basename($_FILES["file_surat"]["name"]);
-        move_uploaded_file($_FILES["file_surat"]["tmp_name"], $targetDir . $file_surat);
-        $fileQuery = ", file_surat='$file_surat'";
+    if ($file && !empty($file['name'])) {
+        $uploadDir = __DIR__ . '/../uploads/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+        $fileBaru = time() . '_' . basename($file['name']);
+        move_uploaded_file($file['tmp_name'], $uploadDir . $fileBaru);
+
+        if ($fileLama && file_exists($uploadDir . $fileLama)) unlink($uploadDir . $fileLama);
+        $fileLama = $fileBaru;
     }
 
-    mysqli_query($koneksi, "UPDATE surat_masuk SET 
-        no_surat='$no_surat', tgl_surat='$tgl_surat', tgl_terima='$tgl_terima', 
-        pengirim='$pengirim', alamat_pengirim='$alamat_pengirim', 
-        perihal='$perihal', isi='$isi', status='$status', id_pegawai='$id_pegawai'
-        $fileQuery WHERE id_surat_masuk='$id_surat_masuk'");
+    $sql = "UPDATE surat_masuk SET 
+                no_surat='$no_surat',
+                tgl_surat='$tgl_surat',
+                tgl_terima='$tgl_terima',
+                pengirim='$pengirim',
+                alamat_pengirim='$alamat_pengirim',
+                perihal='$perihal',
+                isi='$isi',
+                status='$status',
+                file_surat='$fileLama'
+            WHERE id_surat_masuk=$id";
+    return mysqli_query($koneksi, $sql);
+}
 
-    header("Location: ../index.php?halaman=surat_masuk");
+// === DELETE ===
+function deleteSuratMasuk($koneksi, $id) {
+    $id = (int)$id;
+    $data = getSuratMasukById($koneksi, $id);
+    $file = $data['file_surat'];
 
-} elseif ($proses == 'hapus') {
-    $id = $_GET['id_surat_masuk'];
-    mysqli_query($koneksi, "DELETE FROM surat_masuk WHERE id_surat_masuk='$id'");
-    header("Location: ../index.php?halaman=surat_masuk");
+    if ($file && file_exists(__DIR__ . '/../uploads/' . $file)) {
+        unlink(__DIR__ . '/../uploads/' . $file);
+    }
+
+    $sql = "DELETE FROM surat_masuk WHERE id_surat_masuk = $id";
+    return mysqli_query($koneksi, $sql);
 }
 ?>

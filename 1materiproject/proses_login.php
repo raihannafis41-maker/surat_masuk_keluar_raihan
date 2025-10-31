@@ -1,31 +1,32 @@
 <?php
-include 'koneksi.php';
+// proses_login.php
 session_start();
+require_once "koneksi.php"; // pastikan file koneksi kamu sesuai
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
+    $next     = $_POST['next'] ?? '';
 
-    // Cegah SQL Injection
-    $username = mysqli_real_escape_string($koneksi, $username);
-    $password = mysqli_real_escape_string($koneksi, $password);
-
-    // Ambil data admin dari database
+    // Cek user di database
     $query = mysqli_query($koneksi, "SELECT * FROM admin WHERE username='$username' LIMIT 1");
-    $data = mysqli_fetch_assoc($query);
 
-    if ($data) {
-        // Jika database masih menggunakan password tanpa hash
-        if ($password === $data['password'] || password_verify($password, $data['password'])) {
+    if ($query && mysqli_num_rows($query) > 0) {
+        $data = mysqli_fetch_assoc($query);
 
-            // Simpan data ke session
-            $_SESSION['login'] = true;
-            $_SESSION['id_admin'] = $data['id_admin'];
-            $_SESSION['user'] = $data['username'];
-            $_SESSION['nama'] = $data['nama_admin'];
+        // Gunakan password_hash di database, tapi tetap izinkan sementara plain text
+        if (password_verify($password, $data['password']) || $password === $data['password']) {
+            $_SESSION['login']       = true;
+            $_SESSION['id_admin']    = $data['id_admin'];
+            $_SESSION['nama_admin']  = $data['nama_admin'];
+            $_SESSION['username']    = $data['username'];
 
-            // Redirect ke dashboard
-            header("Location: index.php");
+            // Redirect ke halaman tujuan (next) jika ada
+            if (!empty($next)) {
+                header("Location: index.php?halaman=" . urlencode($next));
+            } else {
+                header("Location: index.php");
+            }
             exit;
         } else {
             echo "<script>alert('Password salah!');window.location='login.php';</script>";
@@ -36,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 } else {
-    header("Location: login.php");
+    header('Location: login.php');
     exit;
 }
-?>

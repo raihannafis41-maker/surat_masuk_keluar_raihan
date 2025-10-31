@@ -7,9 +7,17 @@ $jumlah_surat_keluar = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*
 $jumlah_pegawai = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM pegawai"))['total'];
 $jumlah_kategori = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM kategori"))['total'];
 
-// --- Ambil 5 surat masuk & keluar terbaru ---
+// --- Ambil 5 surat masuk, keluar, dan disposisi terbaru ---
 $surat_masuk = mysqli_query($koneksi, "SELECT * FROM surat_masuk ORDER BY tgl_surat DESC LIMIT 5");
 $surat_keluar = mysqli_query($koneksi, "SELECT * FROM surat_keluar ORDER BY tgl_surat DESC LIMIT 5");
+$disposisi = mysqli_query($koneksi, "
+    SELECT d.*, sm.no_surat, p.nama_pegawai 
+    FROM disposisi d
+    LEFT JOIN surat_masuk sm ON d.id_surat_masuk = sm.id_surat_masuk
+    LEFT JOIN pegawai p ON d.id_pegawai = p.id_pegawai
+    ORDER BY d.tgl_disposisi DESC
+    LIMIT 5
+");
 
 // --- Ambil data untuk Chart (jumlah surat per bulan) ---
 $chart_masuk = [];
@@ -80,7 +88,7 @@ for ($bulan = 1; $bulan <= 12; $bulan++) {
       </div>
     </div>
 
-    <!-- Surat Terbaru -->
+    <!-- Surat Masuk & Surat Keluar Terbaru -->
     <div class="row">
       <div class="col-md-6">
         <div class="card card-dark">
@@ -97,14 +105,13 @@ for ($bulan = 1; $bulan <= 12; $bulan++) {
                   <th>Tanggal</th>
                 </tr>
               </thead>
-              
               <tbody>
                 <?php $no=1; while($sm = mysqli_fetch_assoc($surat_masuk)): ?>
                 <tr>
                   <td><?= $no++; ?></td>
-                  <td><?= $sm['no_surat']; ?></td>
-                  <td><?= $sm['pengirim']; ?></td>
-                  <td><?= $sm['tgl_surat']; ?></td>
+                  <td><?= htmlspecialchars($sm['no_surat']); ?></td>
+                  <td><?= htmlspecialchars($sm['pengirim']); ?></td>
+                  <td><?= htmlspecialchars($sm['tgl_surat']); ?></td>
                 </tr>
                 <?php endwhile; ?>
               </tbody>
@@ -132,9 +139,46 @@ for ($bulan = 1; $bulan <= 12; $bulan++) {
                 <?php $no=1; while($sk = mysqli_fetch_assoc($surat_keluar)): ?>
                 <tr>
                   <td><?= $no++; ?></td>
-                  <td><?= $sk['no_surat']; ?></td>
-                  <td><?= $sk['tujuan']; ?></td>
-                  <td><?= $sk['tgl_surat']; ?></td>
+                  <td><?= htmlspecialchars($sk['no_surat']); ?></td>
+                  <td><?= htmlspecialchars($sk['tujuan']); ?></td>
+                  <td><?= htmlspecialchars($sk['tgl_surat']); ?></td>
+                </tr>
+                <?php endwhile; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disposisi Terbaru -->
+    <div class="row mt-3">
+      <div class="col-md-12">
+        <div class="card card-dark">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-tasks"></i> 5 Disposisi Terbaru</h3>
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-striped table-dark">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>No Surat</th>
+                  <th>Pegawai</th>
+                  <th>Status</th>
+                  <th>Tanggal</th>
+                  <th>Catatan</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php $no=1; while($d = mysqli_fetch_assoc($disposisi)): ?>
+                <tr>
+                  <td><?= $no++; ?></td>
+                  <td><?= htmlspecialchars($d['no_surat']); ?></td>
+                  <td><?= htmlspecialchars($d['nama_pegawai']); ?></td>
+                  <td><?= htmlspecialchars($d['status_disposisi']); ?></td>
+                  <td><?= htmlspecialchars($d['tgl_disposisi']); ?></td>
+                  <td><?= htmlspecialchars($d['catatan']); ?></td>
                 </tr>
                 <?php endwhile; ?>
               </tbody>

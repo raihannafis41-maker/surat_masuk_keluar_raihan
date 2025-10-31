@@ -1,14 +1,12 @@
 <?php
 // ============================================================
-// ✅ Versi Final index.php — Aman & Kompatibel dengan profil.php + pengaturan.php
+// ✅ Versi Final index.php — Terintegrasi dengan before_login.php & login redirect
 // ============================================================
 
-// Aktifkan error reporting (opsional untuk debugging)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Jalankan session hanya sekali
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -16,9 +14,10 @@ if (session_status() === PHP_SESSION_NONE) {
 // ============================================================
 // 🔐 CEK LOGIN
 // ============================================================
-// Pastikan user sudah login, jika tidak arahkan ke login.php
+// Jika belum login, arahkan ke before_login.php dengan parameter halaman tujuan
 if (empty($_SESSION['login']) || $_SESSION['login'] !== true) {
-    header("Location: login.php");
+    $next = urlencode($_SERVER['REQUEST_URI']);
+    header("Location: before_login.php?next=$next");
     exit;
 }
 
@@ -87,65 +86,65 @@ $id_admin   = $_SESSION['id_admin'] ?? 0;
         if (isset($_GET['halaman'])) {
           switch ($_GET['halaman']) {
 
-            /* ==========================
-               BAGIAN ADMIN
-            ========================== */
+            // ==========================
+            // BAGIAN ADMIN
+            // ==========================
             case "admin":              include "views/admin/admin.php"; break;
             case "tambah_admin":       include "views/admin/tambah_admin.php"; break;
             case "edit_admin":         include "views/admin/edit_admin.php"; break;
             case "hapus_admin":        include "views/admin/hapus_admin.php"; break;
-            case "tampilan_admin":        include "views/admin/tampilan_admin.php"; break;
+            case "tampilan_admin":     include "views/admin/tampilan_admin.php"; break;
 
-            /* ==========================
-               BAGIAN PEGAWAI
-            ========================== */
+            // ==========================
+            // BAGIAN PEGAWAI
+            // ==========================
             case "pegawai":            include "views/pegawai/pegawai.php"; break;
             case "tambah_pegawai":     include "views/pegawai/tambah_pegawai.php"; break;
             case "edit_pegawai":       include "views/pegawai/edit_pegawai.php"; break;
             case "hapus_pegawai":      include "views/pegawai/hapus_pegawai.php"; break;
-            case "tampilan_pegawai":      include "views/pegawai/tampilan_pegawai.php"; break;
+            case "tampilan_pegawai":   include "views/pegawai/tampilan_pegawai.php"; break;
 
-            /* ==========================
-               BAGIAN KATEGORI
-            ========================== */
+            // ==========================
+            // BAGIAN KATEGORI
+            // ==========================
             case "kategori":           include "views/kategori/kategori.php"; break;
             case "tambah_kategori":    include "views/kategori/tambah_kategori.php"; break;
             case "edit_kategori":      include "views/kategori/edit_kategori.php"; break;
             case "hapus_kategori":     include "views/kategori/hapus_kategori.php"; break;
 
-            /* ==========================
-               BAGIAN SURAT KELUAR
-            ========================== */
+            // ==========================
+            // BAGIAN SURAT KELUAR
+            // ==========================
             case "surat_keluar":       include "views/surat_keluar/surat_keluar.php"; break;
             case "tambah_surat_keluar":include "views/surat_keluar/tambah_surat_keluar.php"; break;
             case "edit_surat_keluar":  include "views/surat_keluar/edit_surat_keluar.php"; break;
             case "hapus_surat_keluar": include "views/surat_keluar/hapus_surat_keluar.php"; break;
 
-            /* ==========================
-               BAGIAN SURAT MASUK
-            ========================== */
+            // ==========================
+            // BAGIAN SURAT MASUK
+            // ==========================
             case "surat_masuk":        include "views/surat_masuk/surat_masuk.php"; break;
             case "tambah_surat_masuk": include "views/surat_masuk/tambah_surat_masuk.php"; break;
             case "edit_surat_masuk":   include "views/surat_masuk/edit_surat_masuk.php"; break;
             case "hapus_surat_masuk":  include "views/surat_masuk/hapus_surat_masuk.php"; break;
 
-            /* ==========================
-               BAGIAN DISPOSISI
-            ========================== */
+            // ==========================
+            // BAGIAN DISPOSISI
+            // ==========================
             case "disposisi":          include "views/disposisi/disposisi.php"; break;
             case "tambah_disposisi":   include "views/disposisi/tambah_disposisi.php"; break;
             case "edit_disposisi":     include "views/disposisi/edit_disposisi.php"; break;
             case "hapus_disposisi":    include "views/disposisi/hapus_disposisi.php"; break;
 
-            /* ==========================
-               PROFIL & PENGATURAN
-            ========================== */
+            // ==========================
+            // PROFIL & PENGATURAN
+            // ==========================
             case "profil":             include "views/profil.php"; break;
             case "pengaturan":         include "views/pengaturan.php"; break;
 
-            /* ==========================
-               DASHBOARD / DEFAULT
-            ========================== */
+            // ==========================
+            // DASHBOARD / DEFAULT
+            // ==========================
             case "dashboard":
             case "home":
               include "views/dashboard.php";

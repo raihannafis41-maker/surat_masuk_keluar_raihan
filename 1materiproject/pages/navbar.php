@@ -1,36 +1,45 @@
 <?php
 // ============================================================
-// ✅ NAVBAR FINAL: Menampilkan Foto Profil Admin yang Login
+// ✅ NAVBAR FINAL FIX — Foto Kotak & Tampilan Rapi
 // ============================================================
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-include "koneksi.php";
+$root_path = dirname(__DIR__);
+require_once $root_path . "/koneksi.php";
 
-// Ambil data admin dari session
-$id_admin = $_SESSION['id_admin'] ?? null;
-$nama_admin = "Administrator";
-$email_admin = "-";
-$foto = "default.png"; // default foto
+// ===== Default value =====
+$nama_user = "Pengguna";
+$email_user = "-";
+$foto_path = "assets/img/default.png"; // fallback
+$foto_full_path = $root_path . "/assets/img/default.png";
 
-if ($id_admin) {
-    $query = mysqli_query($koneksi, "SELECT * FROM admin WHERE id_admin = '$id_admin'");
-    if ($data = mysqli_fetch_assoc($query)) {
-        $nama_admin = $data['nama_admin'];
-        $email_admin = $data['email'];
-        $foto = !empty($data['foto']) ? $data['foto'] : "default.png";
+// ===== Deteksi role login =====
+if (!empty($_SESSION['id_admin'])) {
+    $id = $_SESSION['id_admin'];
+    $query = mysqli_query($koneksi, "SELECT nama_admin AS nama, email, foto FROM admin WHERE id_admin='$id'");
+} elseif (!empty($_SESSION['id_pegawai'])) {
+    $id = $_SESSION['id_pegawai'];
+    $query = mysqli_query($koneksi, "SELECT nama_pegawai AS nama, email, foto FROM pegawai WHERE id_pegawai='$id'");
+}
+
+if (!empty($query) && $data = mysqli_fetch_assoc($query)) {
+    $nama_user = $data['nama'] ?? $nama_user;
+    $email_user = $data['email'] ?? $email_user;
+
+    if (!empty($data['foto'])) {
+        $foto_full_path = $root_path . "/assets/img/" . $data['foto'];
+        if (file_exists($foto_full_path)) {
+            $foto_path = "assets/img/" . $data['foto'];
+        }
     }
 }
 
-// Path folder upload foto
-$upload_dir = "uploads/";
-$foto_path = $upload_dir . $foto;
-
-// Jika file foto tidak ada, gunakan default
-if (!file_exists($foto_path)) {
-    $foto_path = "uploads/default.png";
+// ===== Fallback =====
+if (!file_exists($foto_full_path)) {
+    $foto_path = "assets/img/default.png";
 }
 ?>
 
@@ -67,44 +76,43 @@ if (!file_exists($foto_path)) {
     </div>
   </li>
 
-  <!-- 👤 Profil Admin -->
+  <!-- 👤 Profil -->
   <li class="nav-item dropdown user-menu ml-3">
     <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-toggle="dropdown">
       <img src="<?= htmlspecialchars($foto_path) ?>" 
-           class="user-image img-circle elevation-2"
+           class="user-image elevation-2"
            alt="User Image"
-           style="object-fit: cover; width: 35px; height: 35px;">
-      <span class="d-none d-md-inline ml-2 text-white">
-        <?= htmlspecialchars($nama_admin) ?>
+           style="object-fit: cover; width: 35px; height: 35px; border-radius: 6px;">
+      <span class="d-none d-md-inline ml-2 text-white font-weight-bold">
+        <?= htmlspecialchars($nama_user) ?>
       </span>
     </a>
 
+    <!-- Dropdown Menu -->
     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+
       <!-- Header -->
-      <li class="user-header bg-primary">
+      <li class="user-header bg-primary d-flex flex-column align-items-center">
         <img src="<?= htmlspecialchars($foto_path) ?>"
-             class="img-circle elevation-2"
              alt="User Image"
-             style="object-fit: cover; width: 100px; height: 100px;">
-        <p>
-          <?= htmlspecialchars($nama_admin) ?><br>
-          <small><?= htmlspecialchars($email_admin) ?></small>
-        </p>
+             style="object-fit: cover; width: 100px; height: 100px; border-radius: 10px; border: 2px solid #fff;">
+        <p class="mt-2 mb-0 font-weight-bold"><?= htmlspecialchars($nama_user) ?></p>
+        <small><?= htmlspecialchars($email_user) ?></small>
       </li>
 
       <!-- Body -->
-      <li class="user-body text-center">
-        <a href="index.php?halaman=profil" class="btn btn-sm btn-outline-light">
+      <li class="user-body text-center py-2">
+        <a href="index.php?halaman=profil" class="btn btn-outline-primary btn-sm">
           <i class="fas fa-user"></i> Profil Saya
         </a>
       </li>
 
       <!-- Footer -->
-      <li class="user-footer">
+      <li class="user-footer d-flex justify-content-between">
         <a href="index.php?halaman=pengaturan" class="btn btn-default btn-flat">
           <i class="fas fa-cog"></i> Pengaturan
         </a>
-        <a href="logout.php" class="btn btn-danger btn-flat float-right"
+        <a href="logout.php" class="btn btn-danger btn-flat"
            onclick="return confirm('Yakin ingin logout?')">
           <i class="fas fa-sign-out-alt"></i> Keluar
         </a>
@@ -112,3 +120,41 @@ if (!file_exists($foto_path)) {
     </ul>
   </li>
 </ul>
+
+<!-- ========================== STYLE TAMBAHAN ========================== -->
+<style>
+  /* Membuat foto user kotak dan rapi */
+  .user-menu .user-image {
+    border: 2px solid #007bff;
+    transition: transform 0.3s ease;
+  }
+
+  .user-menu .user-image:hover {
+    transform: scale(1.08);
+  }
+
+  .user-header img {
+    transition: transform 0.3s ease;
+  }
+
+  .user-header img:hover {
+    transform: scale(1.05);
+  }
+
+  .user-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+  }
+
+  .user-footer .btn {
+    font-size: 0.9rem;
+  }
+
+  .navbar-nav .nav-link {
+    color: white !important;
+  }
+
+  .navbar-nav .nav-link:hover {
+    color: #ffc107 !important;
+  }
+</style>

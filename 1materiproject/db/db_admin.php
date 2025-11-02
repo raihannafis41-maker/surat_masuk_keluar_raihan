@@ -2,7 +2,8 @@
 require_once __DIR__ . '/../koneksi.php';
 
 /* =====================================================
-   FUNGSI CRUD UNTUK DATA ADMIN (FINAL VERSION)
+   FUNGSI CRUD UNTUK DATA ADMIN
+   (FINAL - FOTO DISIMPAN & DIGUNAKAN DARI assets/img/)
    ===================================================== */
 
 // === READ ALL ADMIN ===
@@ -33,10 +34,19 @@ function tambahAdmin($koneksi, $data, $file) {
 
     $fileName = null;
     if ($file && !empty($file['name'])) {
-        $uploadDir = __DIR__ . '/../uploads/';
-        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-        $fileName = time() . '_' . basename($file['name']);
-        move_uploaded_file($file['tmp_name'], $uploadDir . $fileName);
+        // Lokasi penyimpanan: assets/img/
+        $uploadDir = realpath(__DIR__ . '/../assets/img/') . '/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $fileName = 'admin_' . time() . '.' . $ext;
+        $targetFile = $uploadDir . $fileName;
+
+        if (!move_uploaded_file($file['tmp_name'], $targetFile)) {
+            $fileName = null; // fallback jika gagal upload
+        }
     }
 
     $sql = "INSERT INTO admin (nama_admin, username, password, email, no_telp, foto)
@@ -56,14 +66,24 @@ function updateAdmin($koneksi, $id, $data, $file) {
     $email      = mysqli_real_escape_string($koneksi, $data['email']);
     $no_telp    = mysqli_real_escape_string($koneksi, $data['no_telp']);
 
+    // Proses upload foto baru (jika ada)
     if ($file && !empty($file['name'])) {
-        $uploadDir = __DIR__ . '/../uploads/';
-        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-        $fileBaru = time() . '_' . basename($file['name']);
-        move_uploaded_file($file['tmp_name'], $uploadDir . $fileBaru);
+        $uploadDir = realpath(__DIR__ . '/../assets/img/') . '/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
 
-        if ($fotoLama && file_exists($uploadDir . $fotoLama)) unlink($uploadDir . $fotoLama);
-        $fotoLama = $fileBaru;
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $fileBaru = 'admin_' . time() . '.' . $ext;
+        $targetFile = $uploadDir . $fileBaru;
+
+        if (move_uploaded_file($file['tmp_name'], $targetFile)) {
+            // Hapus foto lama jika ada
+            if ($fotoLama && file_exists($uploadDir . $fotoLama)) {
+                unlink($uploadDir . $fotoLama);
+            }
+            $fotoLama = $fileBaru;
+        }
     }
 
     $sql = "UPDATE admin SET 
@@ -83,8 +103,9 @@ function deleteAdmin($koneksi, $id) {
     $data = getAdminById($koneksi, $id);
     $foto = $data['foto'];
 
-    if ($foto && file_exists(__DIR__ . '/../uploads/' . $foto)) {
-        unlink(__DIR__ . '/../uploads/' . $foto);
+    $uploadDir = realpath(__DIR__ . '/../assets/img/') . '/';
+    if ($foto && file_exists($uploadDir . $foto)) {
+        unlink($uploadDir . $foto);
     }
 
     $sql = "DELETE FROM admin WHERE id_admin = $id";

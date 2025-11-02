@@ -1,9 +1,18 @@
 <?php
-require_once __DIR__ . '/../../db/db_admin.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// koneksi langsung
+require_once __DIR__ . '/../../koneksi.php';
+require_once __DIR__ . '/../../db/db_admin.php'; // pastikan file ini ada dan isinya fungsi tambahAdmin()
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (tambahAdmin($koneksi, $_POST, $_FILES['foto'])) {
-        echo "<script>alert('Admin berhasil ditambahkan!'); window.location='index.php?halaman=admin';</script>";
+    $berhasil = tambahAdmin($koneksi, $_POST, $_FILES['foto']);
+
+    if ($berhasil) {
+        // Redirect pakai meta refresh agar aman dari "headers already sent"
+        echo "<meta http-equiv='refresh' content='0;url=index.php?halaman=admin'>";
+        exit;
     } else {
         echo "<script>alert('Gagal menambahkan admin!');</script>";
     }
@@ -36,7 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
                 <label>Foto</label>
-                <input type="file" name="foto" class="form-control">
+                <input type="file" name="foto" class="form-control" accept="image/*">
+                <small class="text-muted">Foto akan disimpan di folder <strong>assets/img/</strong></small>
             </div>
             <button type="submit" class="btn btn-primary">Simpan</button>
             <a href="index.php?halaman=admin" class="btn btn-secondary">Kembali</a>

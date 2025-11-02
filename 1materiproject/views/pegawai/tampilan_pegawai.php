@@ -22,27 +22,59 @@ if (!$data) {
 }
 ?>
 
+<style>
+/* Tampilan umum */
+.card {
+    border-radius: 16px;
+    overflow: hidden;
+}
+.card-header {
+    font-weight: 600;
+}
+.card-body {
+    background-color: #1e293b;
+    color: #fff;
+}
+
+/* Foto kotak melengkung — sama dengan halaman pegawai */
+.foto-pegawai {
+    width: 150px;
+    height: 180px;
+    border-radius: 16px;
+    border: 4px solid #e3eaf4;
+    object-fit: cover;
+    object-position: center;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+</style>
+
 <div class="card shadow border-0">
     <div class="card-header bg-primary text-white">
         <h5 class="mb-0"><i class="fas fa-info-circle"></i> Detail Pegawai</h5>
     </div>
 
-    <div class="card-body bg-dark text-white">
+    <div class="card-body">
         <div class="row align-items-start text-start">
             <div class="col-md-3 mb-4 text-center">
                 <?php
-                $fotoPath = "foto/" . ($data['foto'] ?? '');
-                if (!empty($data['foto']) && file_exists($fotoPath)): ?>
+                // ✅ Path foto disesuaikan agar sama dengan edit_pegawai.php & profil.php
+                $fotoPath = "assets/img/" . ($data['foto'] ?? '');
+                $fotoFullPath = __DIR__ . '/../../' . $fotoPath;
+
+                if (!empty($data['foto']) && file_exists($fotoFullPath)): ?>
                     <img src="<?= htmlspecialchars($fotoPath); ?>" 
-                         class="rounded-circle border border-light shadow-sm mb-2"
-                         width="160" height="160" style="object-fit: cover;">
+                         alt="Foto Pegawai"
+                         class="foto-pegawai mb-2">
                 <?php else: ?>
                     <img src="assets/img/default-user.png"
-                         class="rounded-circle border border-light shadow-sm mb-2"
-                         width="160" height="160">
+                         alt="Default Foto"
+                         class="foto-pegawai mb-2">
                 <?php endif; ?>
-                <h5 class="mt-2"><?= htmlspecialchars($data['nama_pegawai']); ?></h5>
-                <span class="badge bg-success"><i class="fas fa-user-tie"></i> Pegawai</span>
+
+                <h5 class="mt-3"><?= htmlspecialchars($data['nama_pegawai']); ?></h5>
+                <span class="badge bg-success">
+                    <i class="fas fa-user-tie"></i> Pegawai
+                </span>
             </div>
 
             <div class="col-md-7">

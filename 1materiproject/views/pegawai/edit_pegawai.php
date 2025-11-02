@@ -1,185 +1,174 @@
 <?php
-// =============================================================
-// 🧩 Konfigurasi & Validasi Awal
-// =============================================================
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 include 'koneksi.php';
 
-// Pastikan parameter id ada
+// ============================
+// 🔹 Cek ID Pegawai
+// ============================
 if (!isset($_GET['id'])) {
     echo "<script>alert('ID pegawai tidak ditemukan!');window.location='index.php?halaman=pegawai';</script>";
     exit;
 }
 
 $id = intval($_GET['id']);
-$query = mysqli_query($koneksi, "SELECT * FROM pegawai WHERE id_pegawai = '$id'");
-$data = mysqli_fetch_assoc($query);
-
+$data = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM pegawai WHERE id_pegawai = '$id'"));
 if (!$data) {
     echo "<script>alert('Data pegawai tidak ditemukan!');window.location='index.php?halaman=pegawai';</script>";
     exit;
 }
 
-// =============================================================
-// 🧠 Proses Update Data
-// =============================================================
+// ============================
+// 🔹 PROSES UPDATE
+// ============================
 if (isset($_POST['update'])) {
-    $nip = mysqli_real_escape_string($koneksi, $_POST['nip']);
-    $nama = mysqli_real_escape_string($koneksi, $_POST['nama_pegawai']);
-    $jabatan = mysqli_real_escape_string($koneksi, $_POST['jabatan']);
-    $email = mysqli_real_escape_string($koneksi, $_POST['email']);
-    $no_telp = mysqli_real_escape_string($koneksi, $_POST['no_telp']);
-    $golongan = mysqli_real_escape_string($koneksi, $_POST['golongan']);
+    $nip       = $_POST['nip'];
+    $nama      = $_POST['nama_pegawai'];
+    $jabatan   = $_POST['jabatan'];
+    $email     = $_POST['email'];
+    $no_telp   = $_POST['no_telp'];
+    $golongan  = $_POST['golongan'];
     $foto_lama = $data['foto'];
 
-    // Validasi sederhana
-    if (empty($nip) || empty($nama) || empty($jabatan)) {
-        echo "<script>alert('NIP, Nama, dan Jabatan wajib diisi!');</script>";
-    } else {
-        // Proses upload foto
-        if (!empty($_FILES['foto']['name'])) {
-            $foto = $_FILES['foto']['name'];
-            $tmp = $_FILES['foto']['tmp_name'];
-            $ext = strtolower(pathinfo($foto, PATHINFO_EXTENSION));
-            $allowed = ['jpg', 'jpeg', 'png'];
+    // 🔸 Folder penyimpanan disamakan dengan profil.php dan pegawai.php
+    $folder = __DIR__ . "/../../assets/img/";
+    if (!is_dir($folder)) mkdir($folder, 0777, true);
 
-            if (in_array($ext, $allowed)) {
-                $newName = 'pegawai_' . time() . '.' . $ext;
-                $folder = "foto/";
+    // Upload foto baru jika ada
+    if (!empty($_FILES['foto']['name'])) {
+        $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png'];
 
-                // Hapus foto lama jika ada
-                if (!empty($foto_lama) && file_exists($folder . $foto_lama)) {
-                    unlink($folder . $foto_lama);
-                }
+        if (in_array($ext, $allowed)) {
+            // 🔸 Penamaan file sinkron dengan profil.php
+            $newName = "pegawai_" . $id . "_" . time() . "." . $ext;
+            $path = $folder . $newName;
 
-                // Upload file baru
-                move_uploaded_file($tmp, $folder . $newName);
-                $foto = $newName;
-            } else {
-                echo "<script>alert('Format foto tidak valid! Hanya JPG, JPEG, atau PNG.');</script>";
-                $foto = $foto_lama;
+            // Hapus foto lama jika ada
+            if (!empty($foto_lama) && file_exists($folder . $foto_lama)) {
+                unlink($folder . $foto_lama);
             }
-        } else {
-            $foto = $foto_lama; // tetap gunakan foto lama
-        }
 
-        // Update ke database
-        $update = mysqli_query($koneksi, "UPDATE pegawai SET 
-            nip='$nip',
-            nama_pegawai='$nama',
-            jabatan='$jabatan',
-            email='$email',
-            no_telp='$no_telp',
-            golongan='$golongan',
-            foto='$foto'
-            WHERE id_pegawai='$id'
-        ");
-
-        if ($update) {
-            echo "<script>alert('✅ Data pegawai berhasil diperbarui!');window.location='index.php?halaman=pegawai';</script>";
+            move_uploaded_file($_FILES['foto']['tmp_name'], $path);
+            $foto = $newName;
         } else {
-            echo "<script>alert('❌ Gagal memperbarui data!');</script>";
+            $foto = $foto_lama;
         }
+    } else {
+        $foto = $foto_lama;
+    }
+
+    // Update data pegawai
+    $update = mysqli_query($koneksi, "UPDATE pegawai SET 
+        nip='$nip',
+        nama_pegawai='$nama',
+        jabatan='$jabatan',
+        email='$email',
+        no_telp='$no_telp',
+        golongan='$golongan',
+        foto='$foto'
+        WHERE id_pegawai='$id'
+    ");
+
+    if ($update) {
+        echo "<script>window.location='index.php?halaman=pegawai';</script>";
+        exit;
+    } else {
+        echo "<script>alert('Gagal memperbarui data!');</script>";
     }
 }
 ?>
 
-<!-- =============================================================
-💠 Tampilan Form Edit Pegawai (Rapi & Seragam dengan Pengaturan)
-============================================================= -->
-<div class="card shadow-lg border-0">
-    <div class="card-header bg-warning text-white">
-        <h3 class="card-title mb-0">
-            <i class="fas fa-user-edit"></i> Edit Data Pegawai
+<!-- ============================
+     💠 STYLE FOTO PREVIEW
+============================= -->
+<style>
+.foto-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.foto-preview img {
+    width: 160px;
+    height: 180px;
+    border-radius: 16px; /* Kotak dengan sudut melengkung */
+    object-fit: cover;
+    border: 3px solid #e3eaf4;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+</style>
+
+<!-- ============================
+     💠 FORM EDIT PEGAWAI
+============================= -->
+<div class='card shadow-lg border-0'>
+    <div class='card-header bg-warning text-white'>
+        <h3 class='card-title mb-0'>
+            <i class='fas fa-user-edit'></i> Edit Data Pegawai
         </h3>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" id="formEditPegawai">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">NIP</label>
-                    <input type="text" name="nip" value="<?= htmlspecialchars($data['nip']); ?>" class="form-control" required>
+    <form method='POST' enctype='multipart/form-data'>
+        <div class='card-body'>
+
+            <!-- ✅ Preview Foto -->
+            <div class='foto-preview'>
+                <?php
+                // 🔸 Path foto disamakan dengan profil.php
+                $fotoPath = 'assets/img/' . ($data['foto'] ?: 'default.png');
+                if (!file_exists(__DIR__ . '/../../' . $fotoPath)) {
+                    $fotoPath = 'assets/img/default.png';
+                }
+                ?>
+                <img src='<?= htmlspecialchars($fotoPath); ?>' alt='Foto Pegawai'>
+            </div>
+
+            <div class='row'>
+                <div class='col-md-6 mb-3'>
+                    <label class='form-label'>NIP</label>
+                    <input type='text' name='nip' value='<?= htmlspecialchars($data['nip']); ?>' class='form-control'>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Nama Pegawai</label>
-                    <input type="text" name="nama_pegawai" value="<?= htmlspecialchars($data['nama_pegawai']); ?>" class="form-control" required>
+                <div class='col-md-6 mb-3'>
+                    <label class='form-label'>Nama Pegawai</label>
+                    <input type='text' name='nama_pegawai' value='<?= htmlspecialchars($data['nama_pegawai']); ?>' class='form-control'>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Jabatan</label>
-                    <input type="text" name="jabatan" value="<?= htmlspecialchars($data['jabatan']); ?>" class="form-control" required>
+                <div class='col-md-6 mb-3'>
+                    <label class='form-label'>Jabatan</label>
+                    <input type='text' name='jabatan' value='<?= htmlspecialchars($data['jabatan']); ?>' class='form-control'>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" value="<?= htmlspecialchars($data['email']); ?>" class="form-control">
+                <div class='col-md-6 mb-3'>
+                    <label class='form-label'>Email</label>
+                    <input type='email' name='email' value='<?= htmlspecialchars($data['email']); ?>' class='form-control'>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">No. Telepon</label>
-                    <input type="text" name="no_telp" value="<?= htmlspecialchars($data['no_telp']); ?>" 
-                           class="form-control" pattern="[0-9+ ]+" title="Hanya angka atau tanda + diperbolehkan">
+                <div class='col-md-6 mb-3'>
+                    <label class='form-label'>No. Telepon</label>
+                    <input type='text' name='no_telp' value='<?= htmlspecialchars($data['no_telp']); ?>' class='form-control'>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Golongan</label>
-                    <input type="text" name="golongan" value="<?= htmlspecialchars($data['golongan']); ?>" class="form-control">
+                <div class='col-md-6 mb-3'>
+                    <label class='form-label'>Golongan</label>
+                    <input type='text' name='golongan' value='<?= htmlspecialchars($data['golongan']); ?>' class='form-control'>
                 </div>
 
-                <div class="col-md-12 mb-3">
-                    <label class="form-label">Foto Pegawai</label>
-                    <div class="d-flex align-items-center gap-3">
-                        <?php
-                        $foto = $data['foto'] ?? '';
-                        $path = "foto/" . $foto;
-                        if (!empty($foto) && file_exists($path)): ?>
-                            <img src="<?= $path ?>" alt="Foto Pegawai" class="rounded-circle border" width="70" height="70">
-                        <?php else: ?>
-                            <img src="assets/img/default.png" alt="Default" class="rounded-circle border" width="70" height="70">
-                        <?php endif; ?>
-                        <input type="file" name="foto" accept="image/*" class="form-control" style="max-width:300px;">
-                    </div>
-                    <small class="text-muted">Format: JPG, JPEG, PNG (Maks 2MB)</small>
+                <div class='col-md-12 mb-3'>
+                    <label class='form-label'>Ganti Foto (opsional)</label>
+                    <input type='file' name='foto' accept='image/*' class='form-control'>
                 </div>
             </div>
         </div>
 
-        <div class="card-footer text-end">
-            <button type="submit" name="update" class="btn btn-success">
-                <i class="fas fa-save"></i> Simpan Perubahan
+        <div class='card-footer text-end'>
+            <button type='submit' name='update' class='btn btn-success'>
+                <i class='fas fa-save'></i> Simpan
             </button>
-            <a href="index.php?halaman=pegawai" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Kembali
+            <a href='index.php?halaman=pegawai' class='btn btn-secondary'>
+                <i class='fas fa-arrow-left'></i> Kembali
             </a>
         </div>
     </form>
 </div>
-
-<!-- =============================================================
-🧠 Validasi Upload File di Browser
-============================================================= -->
-<script>
-document.getElementById('formEditPegawai').addEventListener('submit', function(e) {
-    const fileInput = document.querySelector('input[name="foto"]');
-    const file = fileInput.files[0];
-    if (file) {
-        const allowed = ['jpg', 'jpeg', 'png'];
-        const ext = file.name.split('.').pop().toLowerCase();
-        const size = file.size / 1024 / 1024;
-
-        if (!allowed.includes(ext)) {
-            alert('❌ Hanya file JPG, JPEG, atau PNG yang diperbolehkan.');
-            e.preventDefault();
-            return;
-        }
-
-        if (size > 2) {
-            alert('❌ Ukuran file tidak boleh lebih dari 2MB.');
-            e.preventDefault();
-        }
-    }
-});
-</script>

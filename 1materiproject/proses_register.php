@@ -8,15 +8,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $konfirmasi = $_POST['konfirmasi_password'] ?? '';
 
   // Folder upload foto
-  $upload_dir = "uploads/";
+  $upload_dir = __DIR__ . "/assets/img/";  // arahkan ke assets/img/
   if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
 
   // Proses upload foto (jika ada)
   $foto_nama = "default.png";
   if (!empty($_FILES['foto']['name'])) {
-    $foto_tmp = $_FILES['foto']['tmp_name'];
-    $foto_nama = time() . '_' . basename($_FILES['foto']['name']);
-    move_uploaded_file($foto_tmp, $upload_dir . $foto_nama);
+    $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+    $foto_nama = time() . '_' . uniqid() . '.' . $ext;
+    move_uploaded_file($_FILES['foto']['tmp_name'], $upload_dir . $foto_nama);
   }
 
   // ============================================================
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       exit;
     }
 
-    // Simpan ke tabel pegawai (tanpa kolom password)
+    // Simpan ke tabel pegawai
     $query = "INSERT INTO pegawai (nip, jabatan, email, no_telp, golongan, foto)
               VALUES ('$nip', '$jabatan', '$email', '$no_telp', '$golongan', '$foto_nama')";
 

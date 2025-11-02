@@ -44,8 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
                 <label>Foto Lama</label><br>
-                <?php if ($data['foto']): ?>
-                    <img src="uploads/<?= $data['foto']; ?>" width="100" class="img-thumbnail mb-2"><br>
+                <?php if (!empty($data['foto']) && file_exists(__DIR__ . '/../../assets/img/' . $data['foto'])): ?>
+                    <img src="assets/img/<?= htmlspecialchars($data['foto']); ?>" width="100" class="img-thumbnail mb-2"><br>
+                <?php else: ?>
+                    <img src="assets/img/default-user.png" width="100" class="img-thumbnail mb-2"><br>
                 <?php endif; ?>
                 <input type="file" name="foto" class="form-control">
             </div>

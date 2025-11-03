@@ -1,5 +1,6 @@
 <?php
-include "koneksi.php";
+include __DIR__ . '/../koneksi.php';
+
 
 // ====== HITUNG JUMLAH DATA ======
 $jumlah_surat_masuk = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM surat_masuk"))['total'];
